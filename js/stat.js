@@ -14,15 +14,53 @@ const TITLE_MARGIN_X = 30;
 const TITLE_MARGIN_Y = 20;
 const START_Y = TEXT_HEIGHT + BAR_HEIGHT + GAP + TITLE_HEIGHT;
 
-let renderCloud = function (ctx, x, y, color) {
+const renderCloud = (ctx, x, y, color) => {
   ctx.fillStyle = color;
   ctx.fillRect(x, y, CLOUD_WIDTH, CLOUD_HEIGHT);
 };
 
-let getSaturation = function randomInt(min, max) {
+const renderText = (ctx, text, x, y, color = `black`, font = `16px PT Mono`) => {
+  ctx.textBaseline = `hanging`;
+  ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.fillText(text, x, y);
+};
+
+const renderBar = (ctx, x, h, color) => {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, START_Y, BAR_WIDTH, h);
+};
+
+const renderBarInformative = (ctx, names, times) => {
+  const maxTime = getMaxElement(times);
+  for (let i = 0; i < names.length; i++) {
+    const BAR_X = CLOUD_X + GAP + (BAR_WIDTH + GAP) * i;
+    renderText(
+        ctx,
+        names[i],
+        BAR_X,
+        START_Y + TEXT_HEIGHT
+    );
+    renderBar(
+        ctx,
+        BAR_X,
+        -(BAR_HEIGHT * times[i] / maxTime),
+        (names[i] === `Вы`) ? `hsl(0, 100%, 50%)` : `hsl(240,` + getSaturation(0, 100) + `%, 50%)`
+    );
+    renderText(
+        ctx,
+        Math.round(times[i]),
+        BAR_X,
+        START_Y - (BAR_HEIGHT * times[i] / maxTime) - TEXT_HEIGHT
+    );
+  }
+};
+
+const getSaturation = (min, max) => {
   return Math.random() * (max - min) + min;
 };
-let getMaxElement = function (arr) {
+
+const getMaxElement = (arr) => {
   let maxElement = arr[0];
 
   for (let i = 1; i < arr.length; i++) {
@@ -34,7 +72,7 @@ let getMaxElement = function (arr) {
   return maxElement;
 };
 
-window.renderStatistics = function (ctx, names, times) {
+window.renderStatistics = (ctx, names, times) => {
   renderCloud(
       ctx,
       CLOUD_X + CLOUD_GAP,
@@ -48,46 +86,18 @@ window.renderStatistics = function (ctx, names, times) {
       `#fff`
   );
 
-  ctx.fillStyle = `#000`;
-
-  let maxTime = getMaxElement(times);
-  ctx.font = `16px PT Mono`;
-  ctx.textBaseline = `hanging`;
-  ctx.fillText(
+  renderText(
+      ctx,
       `Ура вы победили!`,
       CLOUD_X + TITLE_MARGIN_X,
       CLOUD_Y + TITLE_MARGIN_Y
   );
-
-  ctx.fillText(
+  renderText(
+      ctx,
       `Список результатов:`,
       CLOUD_X + TITLE_MARGIN_X,
       CLOUD_Y + 2 * TITLE_MARGIN_Y
   );
+  renderBarInformative(ctx, names, times);
 
-  ctx.font = `15px Arial`;
-
-  for (let i = 0; i < names.length; i++) {
-    ctx.fillText(
-        names[i],
-        CLOUD_X + GAP + (BAR_WIDTH + GAP) * i,
-        START_Y + TEXT_HEIGHT
-    );
-    ctx.fillStyle = (names[i] === `Вы`) ? `hsl(0, 100%, 50%)` : `hsl(240,` + getSaturation(0, 100) + `%, 50%)`;
-
-    ctx.fillRect(
-        CLOUD_X + GAP + (BAR_WIDTH + GAP) * i,
-        START_Y,
-        BAR_WIDTH,
-        -(BAR_HEIGHT * times[i] / maxTime)
-    );
-
-    ctx.fillStyle = `black`;
-
-    ctx.fillText(
-        Math.round(times[i]),
-        CLOUD_X + GAP + (BAR_WIDTH + GAP) * i,
-        START_Y - (BAR_HEIGHT * times[i] / maxTime) - TEXT_HEIGHT
-    );
-  }
 };
