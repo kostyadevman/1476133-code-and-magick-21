@@ -1,7 +1,5 @@
 'use strict';
 (function () {
-  const NAMES = [`Иван`, `Хуан Себастьян`, `Мария`, `Кристоф`, `Виктор`, `Юлия`, `Люпита`, `Вашингтон`];
-  const SURNAMES = [`да Марья`, `Верон`, `Мирабелла`, `Вальц`, `Онопко`, `Топольницкая`, `Нионго`, `Ирвинг`];
   const COAT_COLORS = [
     `rgb(101, 137, 164)`,
     `rgb(241, 43, 107)`,
@@ -13,7 +11,6 @@
   const EYES_COLORS = [`black`, `red`, `blue`, `yellow`, `green`];
   const FIREBALL_COLORS = [`#ee4830`, `#30a8ee`, `#5ce6c0`, `#e848d5`, `#e6e848`];
   const WIZARD_COUNT = 4;
-  const wizards = [];
   const userDialog = document.querySelector(`.setup`);
   const similarListElement = userDialog.querySelector(`.setup-similar-list`);
   const similarWizardTemplate = document.querySelector(`#similar-wizard-template`)
@@ -23,43 +20,17 @@
   const wizardCoat = wizardOriginal.querySelector(`.wizard-coat`);
   const wizardEyes = userDialog.querySelector(`.wizard-eyes`);
   const wizardFireball = userDialog.querySelector(`.setup-fireball-wrap`);
+  const form = document.querySelector(`.setup-wizard-form`);
 
   const getRandomItem = (arr) => {
     return Math.floor(Math.random() * arr.length);
   };
 
-  const getWizard = (names, surnames, coatColors, eyesColors) => {
-    const item = {};
-    item.name = names[getRandomItem(names)] + ` ` + surnames[getRandomItem(surnames)];
-    item.coatColor = coatColors[getRandomItem(coatColors)];
-    item.eyesColor = eyesColors[getRandomItem(eyesColors)];
-    return item;
-  };
-
-  const fillWizardList = (wizardCount) => {
-    for (let i = 0; i < wizardCount; i++) {
-      wizards.push(getWizard(NAMES, SURNAMES, COAT_COLORS, EYES_COLORS));
-    }
-  };
-
-  const renderSimilarBlock = () => {
-    similarListElement.appendChild(getFragment(similarWizardTemplate));
-  };
-
-  const getFragment = (template) => {
-    const fragment = document.createDocumentFragment();
-    for (let i = 0; i < wizards.length; i++) {
-      fragment.appendChild(renderWizard(wizards[i], template));
-    }
-
-    return fragment;
-  };
-
-  const renderWizard = function (wizard, template) {
-    const wizardElement = template.cloneNode(true);
+  const renderWizard = function (wizard) {
+    const wizardElement = similarWizardTemplate.cloneNode(true);
     wizardElement.querySelector(`.setup-similar-label`).textContent = wizard.name;
-    wizardElement.querySelector(`.wizard-coat`).style.fill = wizard.coatColor;
-    wizardElement.querySelector(`.wizard-eyes`).style.fill = wizard.eyesColor;
+    wizardElement.querySelector(`.wizard-coat`).style.fill = wizard.colorCoat;
+    wizardElement.querySelector(`.wizard-eyes`).style.fill = wizard.colorEyes;
 
     return wizardElement;
   };
@@ -67,6 +38,35 @@
   const showSimilarBlock = () => {
     userDialog.querySelector(`.setup-similar`).classList.remove(`hidden`);
   };
+
+  const successHandeler = (wizards) => {
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < WIZARD_COUNT; i++) {
+      fragment.appendChild(renderWizard(wizards[getRandomItem(wizards)]));
+    }
+    similarListElement.appendChild(fragment);
+    userDialog.querySelector(`.setup-similar`).classList.remove(`hidden`);
+  };
+
+  const errorHandler = function (errorMessage) {
+    const node = document.createElement(`div`);
+    node.style = `z-index: 100; margin: 0 auto; text-align: center; background-color: red;`;
+    node.style.position = `absolute`;
+    node.style.left = 0;
+    node.style.right = 0;
+    node.style.fontSize = `30px`;
+
+    node.textContent = errorMessage;
+    document.body.insertAdjacentElement(`afterbegin`, node);
+  };
+
+  const formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    const formData = new FormData(form);
+    window.backend.save(formData, window.dialog.close, errorHandler);
+  };
+
+  form.addEventListener(`submit`, formSubmitHandler);
 
   const wizardClickHandler = (evt) => {
     if (evt.target.classList.contains(`wizard-coat`)) {
@@ -90,9 +90,9 @@
   wizardFireball.addEventListener(`click`, fireballClickHandler);
 
 
-  fillWizardList(WIZARD_COUNT);
-  renderSimilarBlock();
   showSimilarBlock();
+  window.backend.load(successHandeler, errorHandler);
+
 })();
 
 
