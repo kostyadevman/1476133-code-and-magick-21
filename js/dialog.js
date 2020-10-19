@@ -87,4 +87,7 @@
     document.addEventListener(`mouseup`, onMouseUp);
   });
 
+  window.dialog = {
+    close: closeDialog
+  };
 })();
