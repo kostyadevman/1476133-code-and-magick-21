@@ -1,13 +1,13 @@
 'use strict';
 
-(function () {
-  const form = document.querySelector(`.setup-wizard-form`);
 
-  const formSubmitHandler = (evt) => {
-    evt.preventDefault();
-    const formData = new FormData(form);
-    window.backend.save(formData, window.dialog.close, window.util.errorHandler);
-  };
+const form = document.querySelector(`.setup-wizard-form`);
 
-  form.addEventListener(`submit`, formSubmitHandler);
-})();
+const formSubmitHandler = (evt) => {
+  evt.preventDefault();
+  const formData = new FormData(form);
+  window.backend.save(formData, window.dialog.close, window.util.errorHandler);
+};
+
+form.addEventListener(`submit`, formSubmitHandler);
+
