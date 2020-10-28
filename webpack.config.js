@@ -12,6 +12,7 @@ module.exports = {
     "./js/filter.js",
     "./js/setup.js",
     "./js/stat.js",
+    "./js/avatar.js",
     "./js/game.js"
   ],
   output: {
